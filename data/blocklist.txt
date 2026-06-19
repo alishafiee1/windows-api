@@ -1,0 +1,54 @@
+# ─── Disk & Partition ───────────────────────────────
+format
+diskpart
+clean all
+convert gpt
+convert mbr
+
+# ─── Destructive File Operations ────────────────────
+del /f /s /q
+rd /s /q
+rmdir /s /q
+remove-item -recurse -force
+
+# ─── System File Tampering ──────────────────────────
+takeown
+icacls
+cacls
+attrib -r -s
+
+# ─── Registry ───────────────────────────────────────
+reg delete
+reg add
+remove-itemproperty
+set-itemproperty
+
+# ─── Boot & Recovery ────────────────────────────────
+bcdedit
+bootrec
+reagentc
+
+# ─── User & Privilege Escalation ────────────────────
+net user
+net localgroup administrators
+add-localgroup member
+new-localuser
+
+# ─── Firewall & Network ─────────────────────────────
+netsh advfirewall
+netsh firewall
+set-netfirewallprofile
+
+# ─── Power & Shutdown ───────────────────────────────
+shutdown /r /f
+shutdown /s /f
+restart-computer -force
+
+# ─── Cipher & Wipe ──────────────────────────────────
+cipher /w
+sdelete
+
+# ─── Service Tampering ──────────────────────────────
+sc delete
+remove-service
+stop-service -force

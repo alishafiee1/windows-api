@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Command Approval – windows-cmd-api</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #2e2e2e;
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 680px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      margin-bottom: 0.4rem;
+      color: #fff;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.7rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+    .badge.warning  { background: #7c3a00; color: #ffb347; }
+    .badge.success  { background: #0e3d1f; color: #4caf7d; }
+    .badge.danger   { background: #3d0e0e; color: #f28b82; }
+    .badge.neutral  { background: #2a2a2a; color: #aaa; }
+
+    .label {
+      font-size: 0.75rem;
+      color: #888;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    pre {
+      background: #111;
+      border: 1px solid #2e2e2e;
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #f0c674;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin-bottom: 1.5rem;
+    }
+
+    pre.output { color: #a8d8a8; }
+    pre.error  { color: #f28b82; }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    button {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.85; }
+
+    .btn-approve { background: #1e6f3e; color: #fff; }
+    .btn-reject  { background: #6f1e1e; color: #fff; }
+
+    .message {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #aaa;
+      line-height: 1.6;
+    }
+
+    .token-id {
+      font-size: 0.75rem;
+      color: #555;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  {% if state == "pending" %}
+    <h1>⚠️ Dangerous Command Detected</h1>
+    <span class="badge warning">Awaiting Approval</span>
+    <div class="label">Command</div>
+    <pre>{{ cmd }}</pre>
+    <form method="POST">
+      <div class="actions">
+        <button class="btn-approve" name="action" value="approve">✅ Approve & Run</button>
+        <button class="btn-reject"  name="action" value="reject">❌ Reject</button>
+      </div>
+    </form>
+
+  {% elif state == "executed" %}
+    <h1>✅ Command Executed</h1>
+    <span class="badge success">Completed</span>
+    <div class="label">Command</div>
+    <pre>{{ cmd }}</pre>
+    {% if output %}
+      <div class="label">Output</div>
+      <pre class="output">{{ output }}</pre>
+    {% endif %}
+    {% if error %}
+      <div class="label">Error</div>
+      <pre class="error">{{ error }}</pre>
+    {% endif %}
+
+  {% elif state == "rejected" %}
+    <h1>❌ Command Rejected</h1>
+    <span class="badge danger">Rejected</span>
+    <div class="label">Command</div>
+    <pre>{{ cmd }}</pre>
+    <p class="message">You rejected this command. It was not executed.</p>
+
+  {% elif state == "expired" %}
+    <h1>⏱ Token Expired</h1>
+    <span class="badge neutral">Expired</span>
+    <p class="message">This approval link has expired or was already used.<br/>
+    Send the command again from your AI assistant to get a new link.</p>
+
+  {% elif state == "already_approved" %}
+    <h1>✅ Already Approved</h1>
+    <span class="badge success">Done</span>
+    <p class="message">This command was already approved and executed.</p>
+
+  {% elif state == "already_rejected" %}
+    <h1>❌ Already Rejected</h1>
+    <span class="badge danger">Done</span>
+    <p class="message">This command was already rejected.</p>
+
+  {% elif state == "error" %}
+    <h1>🚫 Error</h1>
+    <span class="badge danger">Error</span>
+    <pre class="error">{{ error }}</pre>
+
+  {% endif %}
+
+  <p class="token-id">Token: {{ token }}</p>
+</div>
+</body>
+</html>
