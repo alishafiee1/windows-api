@@ -95,11 +95,43 @@ def show_help():
                 },
                 "legacy_aliases": {"path": "alias for loc"},
             },
+            {
+                "path": "/file/edit",
+                "method": "GET",
+                "description": "Apply a partial update to an existing text file.",
+                "query": {
+                    "loc": "string (required)",
+                    "mode": "replace_text | edit_lines",
+                    "old_text": "fast path — required for replace_text",
+                    "new_text": "fast path — required for replace_text; optional for edit_lines",
+                    "start_line": "fast path / edit_lines — 1-indexed",
+                    "end_line": "fast path / edit_lines — 1-indexed, inclusive",
+                    "edit_id": "streaming — session ID (optional on first chunk)",
+                    "chunk_type": "streaming — old_text | new_text",
+                    "payload": "streaming — URL-encoded text chunk",
+                    "init_chunk": "streaming — true clears buffer for chunk_type",
+                    "finalize": "streaming — true completes phase or applies edit",
+                },
+                "modes": {
+                    "replace_text": "Exact string match; fails if old_text appears more than once.",
+                    "edit_lines": "Replace lines start_line..end_line with new_text; empty new_text deletes.",
+                },
+                "streaming_workflow": [
+                    "replace_text: stream old_text chunks (finalize=true), then new_text chunks (finalize=true applies)",
+                    "edit_lines: stream new_text chunks with start_line/end_line; finalize=true applies",
+                    f"Keep each payload under {MAX_CHUNK_CHARS} characters",
+                ],
+                "legacy_aliases": {"path": "alias for loc"},
+            },
         ],
         "client_integration_guidelines": {
             "preferred_methods": "GET is preferred for /run. POST is fallback for payload > 2000 chars.",
             "encoding": "Always URL-encode query values (spaces -> %20, backslashes -> %5C).",
             "file_operations": "Prefer /file/* endpoints over system commands for reliability and UTF-8 compliance.",
+            "partial_edits": (
+                "Use GET /file/edit for targeted changes; prefer replace_text over edit_lines when possible. "
+                "Stream large old_text/new_text via edit_id and chunk_type."
+            ),
             "response_handling": (
                 "Parse 'status' field ('ok', 'error', 'pending', 'timeout'). "
                 "'pending' requires human approval via confirm_url."
