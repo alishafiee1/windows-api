@@ -1,18 +1,33 @@
+from pathlib import Path
+from urllib.parse import quote
+
 from flask import Blueprint, jsonify, request
 from routes.file import MAX_CHUNK_CHARS
 
 help_bp = Blueprint('help', __name__)
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+INTEGRATION_GUIDE_REL = "docs/perplexity-guid.md"
+INTEGRATION_GUIDE_ABS = str(PROJECT_ROOT / INTEGRATION_GUIDE_REL)
+
 
 @help_bp.route('/help', methods=['GET'])
 def show_help():
     base_url = request.host_url.rstrip('/')
+    guide_read_url = f"{base_url}/file/read?loc={quote(INTEGRATION_GUIDE_ABS, safe='')}"
 
     return jsonify({
         "service": "windows-local-integration-api",
         "version": "1.1.0",
         "base_url": base_url,
         "description": "Local API for system operations, command execution, and file synchronization.",
+        "integration_guide_file": {
+            "relative_loc": INTEGRATION_GUIDE_REL,
+            "absolute_loc": INTEGRATION_GUIDE_ABS,
+            "description": "Extended client integration guide (workflows, streaming rules, examples).",
+            "read_via": guide_read_url,
+            "note": "Load this file after /help for complete file-operation workflows.",
+        },
         "endpoints": [
             {
                 "path": "/help",
@@ -128,6 +143,10 @@ def show_help():
             "preferred_methods": "GET is preferred for /run. POST is fallback for payload > 2000 chars.",
             "encoding": "Always URL-encode query values (spaces -> %20, backslashes -> %5C).",
             "file_operations": "Prefer /file/* endpoints over system commands for reliability and UTF-8 compliance.",
+            "integration_guide": (
+                f"See integration_guide_file ({INTEGRATION_GUIDE_REL}) via GET /file/read for "
+                "streaming edit rules and full workflow examples."
+            ),
             "partial_edits": (
                 "Use GET /file/edit for targeted changes; prefer replace_text over edit_lines when possible. "
                 "Stream large old_text/new_text via edit_id and chunk_type."

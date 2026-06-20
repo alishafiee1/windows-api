@@ -29,6 +29,8 @@ def main():
         help_data = client.get("/help").get_json()
 
         assert "client_integration_guidelines" in help_data
+        assert "integration_guide_file" in help_data
+        assert help_data["integration_guide_file"]["relative_loc"] == "docs/perplexity-guid.md"
         for word in TRIGGER_WORDS:
             assert word not in help_body, f"trigger word found: {word}"
         print("OK help: neutral wording")
