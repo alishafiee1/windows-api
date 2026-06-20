@@ -75,7 +75,7 @@ Open [http://127.0.0.1:4001/help](http://127.0.0.1:4001/help) to see the full AP
 
 ### GET /help
 
-Returns the full API documentation as JSON.
+Returns the full API documentation as markdown (`text/markdown; charset=utf-8`).
 
 ```http
 GET http://127.0.0.1:4001/help

@@ -25,15 +25,18 @@ TRIGGER_WORDS = (
 
 def main():
     with app.test_client() as client:
-        help_body = client.get("/help").get_data(as_text=True)
-        help_data = client.get("/help").get_json()
+        help_resp = client.get("/help")
+        help_body = help_resp.get_data(as_text=True)
+        content_type = help_resp.content_type or ""
 
-        assert "client_integration_guidelines" in help_data
-        assert "integration_guide_file" in help_data
-        assert help_data["integration_guide_file"]["relative_loc"] == "docs/perplexity-guid.md"
+        assert help_resp.status_code == 200
+        assert "markdown" in content_type or "text/plain" in content_type
+        assert "# Windows Local Integration API" in help_body
+        assert "GET /file/edit" in help_body
+        assert "GET /file/sync_data" in help_body
         for word in TRIGGER_WORDS:
             assert word not in help_body, f"trigger word found: {word}"
-        print("OK help: neutral wording")
+        print("OK help: markdown guide")
 
         # new API
         client.get(

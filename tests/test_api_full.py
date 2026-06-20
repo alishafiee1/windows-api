@@ -9,13 +9,14 @@ TEST_FILE = r"D:\test_windows_api_temp.txt"
 
 
 def test_help_endpoint():
-    """GET /help should return API docs with status ok"""
+    """GET /help should return markdown API guide"""
     r = requests.get(f"{BASE_URL}/help")
     assert r.status_code == 200
-    data = r.json()
-    assert "endpoints" in data
-    assert "version" in data
-    assert data["service"] == "windows-local-integration-api"
+    assert "markdown" in r.headers.get("Content-Type", "") or "text/plain" in r.headers.get("Content-Type", "")
+    body = r.text
+    assert "# Windows Local Integration API" in body
+    assert "GET /file/edit" in body
+    assert "GET /file/sync_data" in body
 
 
 def test_run_simple_command():
